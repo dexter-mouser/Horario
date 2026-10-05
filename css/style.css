@@ -1,0 +1,245 @@
+/* ==========================================================
+   Estructura y componentes.
+   Todos los colores vienen de variables definidas en
+   css/fondos/<fondo>.css (nunca se escriben colores aquí).
+   ========================================================== */
+
+:root {
+  --alto-barra: 64px;
+  --radio: 16px;
+  --transicion: 150ms ease;
+  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; margin: 0; }
+html { background: var(--fondo, #02060f); }
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: 16px;
+  line-height: 1.4;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+
+/* Texto solo para lectores de pantalla */
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- Contenedor principal ---------- */
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.contenido { flex: 1; min-height: 0; position: relative; }
+
+.pantalla {
+  position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+  padding-right: calc(env(safe-area-inset-right, 0px) + 16px);
+  padding-left: calc(env(safe-area-inset-left, 0px) + 16px);
+  padding-bottom: 104px; /* espacio para que el botón + no tape el final */
+}
+
+.titulo-pantalla { margin: 0; font-size: 1.75rem; line-height: 1.2; }
+.fecha { margin: 2px 0 16px; color: var(--texto-suave); }
+.subtitulo { margin: 0 0 12px; font-size: 1rem; }
+#pantalla-semana > header, #pantalla-ajustes > header { margin-bottom: 16px; }
+
+/* ---------- Barra inferior ---------- */
+.barra {
+  display: flex; gap: 4px;
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+  padding: 6px calc(env(safe-area-inset-right, 0px) + 8px)
+            calc(env(safe-area-inset-bottom, 0px) + 6px)
+            calc(env(safe-area-inset-left, 0px) + 8px);
+}
+.boton-barra {
+  flex: 1; min-height: 52px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: transparent; border: 2px solid transparent; border-radius: 14px;
+  color: var(--texto-suave); font-size: .8rem;
+  transition: color var(--transicion), border-color var(--transicion);
+}
+.boton-barra[aria-current="page"] { color: var(--acento); border-color: var(--acento); }
+.boton-barra svg { width: 24px; height: 24px; display: block; }
+
+/* ---------- Botón flotante ---------- */
+.boton-flotante {
+  position: fixed; z-index: 10;
+  right: calc(env(safe-area-inset-right, 0px) + 20px);
+  bottom: calc(var(--alto-barra) + env(safe-area-inset-bottom, 0px) + 16px);
+  width: 56px; height: 56px; border-radius: 50%; border: 0;
+  display: grid; place-items: center;
+  background: var(--acento); color: var(--texto-sobre-acento);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  transition: transform var(--transicion);
+}
+.boton-flotante:active { transform: scale(.94); }
+.boton-flotante svg { width: 28px; height: 28px; display: block; }
+
+/* ---------- Botones de día (L M X J V S D) ---------- */
+.fila-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.boton-dia {
+  min-height: 44px; border-radius: 12px; font-weight: 700;
+  background: var(--superficie); border: 1px solid var(--borde);
+  transition: background-color var(--transicion), color var(--transicion);
+}
+.boton-dia[aria-pressed="true"] {
+  background: var(--acento); border-color: var(--acento); color: var(--texto-sobre-acento);
+}
+
+/* ---------- Lista de eventos (Hoy) ---------- */
+.lista { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+.evento {
+  display: block; width: 100%; text-align: left;
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 14px 16px;
+}
+.evento-ahora { border-color: var(--acento); }
+.evento-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.evento-horas { color: var(--texto-suave); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.evento-titulo { margin-top: 2px; font-weight: 700; overflow-wrap: anywhere; }
+.evento-nota { margin-top: 4px; color: var(--texto-suave); font-size: .9rem; overflow-wrap: anywhere; white-space: pre-line; }
+
+.mensaje-vacio {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 18px 16px; color: var(--texto-suave);
+}
+
+.etiqueta {
+  background: var(--acento); color: var(--texto-sobre-acento);
+  font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+
+/* ---------- Semana ---------- */
+.cuadricula-semana { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+
+.tarjeta {
+  background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px;
+}
+.tarjeta-hoy { border: 2px solid var(--acento); padding: 15px; }
+
+.cabecera-titulo { margin: 0 0 8px; font-size: 1rem; }
+.cabecera-dia {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0;
+  background: none; border: 0; text-align: left; font-weight: 700;
+}
+.dia-nombre { font-size: 1.1rem; }
+.dia-conteo { margin-left: auto; color: var(--texto-suave); font-weight: 400; font-size: .9rem; }
+
+/* Franja de 24 h: tramos ocupados y huecos */
+.franja {
+  position: relative; height: 12px; border-radius: 6px; overflow: hidden;
+  background-color: var(--superficie-2);
+  background-image: linear-gradient(to right, var(--borde) 1px, transparent 1px);
+  background-size: 25% 100%; /* una marca cada 6 horas */
+}
+.tramo { position: absolute; top: 0; bottom: 0; min-width: 3px; background: var(--acento); opacity: .75; border-radius: 3px; }
+.franja-horas {
+  display: flex; justify-content: space-between; margin: 4px 0 6px;
+  color: var(--texto-suave); font-size: .7rem; font-variant-numeric: tabular-nums;
+}
+
+.fila-evento {
+  display: flex; gap: 12px; width: 100%; min-height: 44px; align-items: center; text-align: left;
+  background: none; border: 0; border-top: 1px solid var(--borde); padding: 8px 0;
+}
+.fila-hora { color: var(--texto-suave); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fila-titulo { overflow-wrap: anywhere; }
+.libre { margin: 4px 0 0; color: var(--texto-suave); }
+
+/* ---------- Ajustes ---------- */
+.grupo-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  min-height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 700;
+  background: var(--superficie-2); border: 2px solid var(--borde);
+}
+.chip[aria-pressed="true"] { border-color: var(--acento); color: var(--acento); }
+
+/* ---------- Hoja inferior (añadir / editar) ---------- */
+.capa {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end;
+  background: rgba(0, 0, 0, .55);
+  visibility: hidden; opacity: 0;
+  transition: opacity var(--transicion), visibility 0s linear var(--transicion);
+}
+.capa.abierta { visibility: visible; opacity: 1; transition: opacity var(--transicion); }
+
+.hoja {
+  width: 100%; max-width: 560px; margin: 0 auto; max-height: 92vh; max-height: 92dvh; overflow-y: auto;
+  background: var(--fondo); border: 1px solid var(--borde); border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  padding: 16px calc(env(safe-area-inset-right, 0px) + 16px)
+           calc(env(safe-area-inset-bottom, 0px) + 16px)
+           calc(env(safe-area-inset-left, 0px) + 16px);
+  transform: translateY(100%); transition: transform 200ms ease;
+}
+.capa.abierta .hoja { transform: none; }
+.hoja:focus { outline: none; }
+
+.bloque { margin-top: 12px; }
+
+.campo {
+  display: block; width: 100%; background: var(--fondo); border: 2px solid var(--borde);
+  border-radius: 14px; padding: 12px 14px; min-height: 52px; font-size: 1rem; /* 16px evita el zoom en iOS */
+}
+.campo::placeholder { color: var(--texto-suave); }
+.campo:focus { border-color: var(--acento); outline: none; }
+textarea.campo { resize: none; margin-top: 4px; }
+
+.enlace {
+  min-height: 44px; padding: 0; background: none; border: 0; color: var(--acento); font-weight: 700;
+}
+
+/* Selectores de hora tipo rueda */
+.horas { display: grid; grid-template-columns: auto 1fr 1fr auto; gap: 8px; align-items: center; }
+.rotulo {
+  width: 36px; height: 48px; display: grid; place-items: center; border-radius: 12px;
+  background: var(--acento); color: var(--texto-sobre-acento); font-weight: 800;
+}
+.selector { position: relative; display: flex; justify-content: center; }
+.marco {
+  position: absolute; left: 0; right: 0; top: var(--alto-opcion); height: var(--alto-opcion);
+  background: var(--superficie-2); border: 1px solid var(--acento); border-radius: 12px; pointer-events: none;
+}
+.separador { position: relative; z-index: 1; align-self: center; width: 14px; text-align: center; color: var(--acento); font-weight: 800; }
+
+.rueda {
+  position: relative; z-index: 1; width: 56px;
+  height: calc(var(--alto-opcion) * 3); padding: var(--alto-opcion) 0;
+  overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
+  scroll-snap-type: y mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.rueda::-webkit-scrollbar { display: none; }
+.opcion {
+  height: var(--alto-opcion); display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: center; color: var(--texto-suave); font-size: 1.25rem; font-variant-numeric: tabular-nums;
+}
+.opcion.activa { color: var(--texto); font-weight: 700; }
+
+/* Botones de la hoja */
+.acciones { display: flex; gap: 12px; margin-top: 12px; }
+.boton {
+  min-height: 52px; padding: 0 20px; border-radius: 16px; font-weight: 700;
+  background: transparent; border: 1px solid var(--borde);
+}
+.boton-primario { flex: 1; background: var(--acento); border-color: var(--acento); color: var(--texto-sobre-acento); }
+.boton-peligro { color: var(--peligro); border-color: var(--peligro); }
+
+/* ---------- Movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

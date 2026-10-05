@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Icono de la aplicación Horario">
+  <title>Horario</title>
+  <rect width="512" height="512" fill="#02060f"/>
+  <rect x="104" y="124" width="304" height="288" rx="56" fill="#0d1830" stroke="#4cc9f0" stroke-width="24"/>
+  <path d="M104 208h304" stroke="#4cc9f0" stroke-width="24"/>
+  <path d="M184 92v64M328 92v64" stroke="#4cc9f0" stroke-width="24" stroke-linecap="round"/>
+  <rect x="156" y="244" width="120" height="26" rx="13" fill="#4cc9f0"/>
+  <rect x="156" y="292" width="200" height="26" rx="13" fill="#4cc9f0" opacity=".75"/>
+  <rect x="156" y="340" width="150" height="26" rx="13" fill="#4cc9f0" opacity=".5"/>
+</svg>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Seguridad: solo recursos propios, sin scripts ni estilos externos -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Horario</title>
+  <meta name="theme-color" content="#02060f">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Horario">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icono.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/icono-apple.png">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Carga el fondo guardado antes de pintar (evita parpadeos) -->
+  <script src="js/fondo-inicial.js"></script>
+</head>
+<body>
+  <div class="app">
+
+    <main class="contenido">
+
+      <!-- Pantalla: Hoy -->
+      <section id="pantalla-hoy" class="pantalla" aria-labelledby="titulo-hoy">
+        <header>
+          <h1 id="titulo-hoy" class="titulo-pantalla">Hoy</h1>
+          <p id="fecha-hoy" class="fecha"></p>
+        </header>
+        <div id="fila-dias-hoy" class="fila-dias" role="group" aria-label="Día de la semana"></div>
+        <ul id="lista-hoy" class="lista"></ul>
+      </section>
+
+      <!-- Pantalla: Semana -->
+      <section id="pantalla-semana" class="pantalla" aria-labelledby="titulo-semana" hidden>
+        <header>
+          <h1 id="titulo-semana" class="titulo-pantalla">Semana</h1>
+        </header>
+        <div id="lista-semana" class="cuadricula-semana"></div>
+      </section>
+
+      <!-- Pantalla: Ajustes -->
+      <section id="pantalla-ajustes" class="pantalla" aria-labelledby="titulo-ajustes" hidden>
+        <header>
+          <h1 id="titulo-ajustes" class="titulo-pantalla">Ajustes</h1>
+        </header>
+        <div class="tarjeta">
+          <h2 id="titulo-fondo" class="subtitulo">Fondo</h2>
+          <div id="opciones-fondo" class="grupo-chips" role="group" aria-labelledby="titulo-fondo"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Botón flotante para añadir -->
+    <button id="boton-anadir" class="boton-flotante" type="button" aria-label="Añadir evento">
+      <span data-icono="mas" data-etiqueta="Icono de añadir"></span>
+    </button>
+
+    <!-- Barra de navegación inferior -->
+    <nav class="barra" aria-label="Principal">
+      <button class="boton-barra" type="button" data-pantalla="hoy">
+        <span data-icono="reloj" data-etiqueta="Icono de Hoy"></span>
+        <span>Hoy</span>
+      </button>
+      <button class="boton-barra" type="button" data-pantalla="semana">
+        <span data-icono="calendario" data-etiqueta="Icono de Semana"></span>
+        <span>Semana</span>
+      </button>
+      <button class="boton-barra" type="button" data-pantalla="ajustes">
+        <span data-icono="ajustes" data-etiqueta="Icono de Ajustes"></span>
+        <span>Ajustes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Hoja inferior de añadir / editar -->
+  <div id="capa-hoja" class="capa" inert>
+    <div id="hoja" class="hoja" role="dialog" aria-modal="true" aria-labelledby="titulo-hoja" tabindex="-1">
+      <h2 id="titulo-hoja" class="solo-lectores">Evento</h2>
+
+      <input id="hoja-titulo" class="campo" type="text" maxlength="60"
+             placeholder="¿Qué tienes?" aria-label="Título" autocomplete="off" enterkeyhint="done">
+
+      <div id="hoja-dias" class="fila-dias bloque" role="group" aria-label="Día del evento"></div>
+
+      <div class="horas bloque">
+        <span class="rotulo" role="img" aria-label="Inicio">I</span>
+        <div id="hoja-selector-inicio"></div>
+        <div id="hoja-selector-fin"></div>
+        <span class="rotulo" role="img" aria-label="Fin">F</span>
+      </div>
+
+      <button id="hoja-boton-nota" class="enlace" type="button" aria-expanded="false" aria-controls="hoja-nota">+ Nota</button>
+      <textarea id="hoja-nota" class="campo" rows="3" maxlength="500" placeholder="Nota" aria-label="Nota" hidden></textarea>
+
+      <div class="acciones">
+        <button id="hoja-borrar" class="boton boton-peligro" type="button" hidden>Borrar</button>
+        <button id="hoja-cancelar" class="boton" type="button">Cancelar</button>
+        <button id="hoja-guardar" class="boton boton-primario" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
