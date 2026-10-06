@@ -1,6 +1,7 @@
 // Fondos disponibles. Para añadir uno: crear css/fondos/<id>.css y registrarlo aquí.
 export const FONDOS = [
   { id: 'oscuro', nombre: 'Oscuro', colorBarra: '#02060f' },
+  { id: 'aurora', nombre: 'Aurora', colorBarra: '#060b14' },
 ];
 export const FONDO_POR_DEFECTO = 'oscuro';
 

@@ -53,7 +53,7 @@ La navegación es una barra inferior con cuatro pestañas: **Hoy**, **Semana**, 
 
 ### 2.4 Ajustes
 
-- **Fondo**: opción **Oscuro**. Cada fondo tiene su propio archivo CSS y se puede añadir otro sin tocar el resto de la app.
+- **Fondo**: opciones **Oscuro** (liso) y **Aurora** (aurora boreal sobre montañas y lago). Cada fondo tiene su propio archivo CSS y se puede añadir otro sin tocar el resto de la app.
 - **Turnos**: lista de turnos guardados (nombre y horario). Tocar uno lo edita; **+ Añadir turno** crea uno nuevo (hasta 12). Ver 7.
 - Las elecciones se recuerdan al volver a abrir la aplicación.
 
@@ -167,6 +167,7 @@ Cada turno tiene `id`, `nombre` (máx. 30 caracteres), `inicio` y `fin` con las 
 - `style.css` contiene solo la estructura y usa únicamente esas variables. Cada fondo (`css/fondos/oscuro.css`) solo define los valores.
 - **Añadir un fondo**: crear `css/fondos/<id>.css` con las mismas variables, registrarlo en `js/fondos.js` y añadirlo a la lista de archivos de `sw.js`.
 - El fondo activo se carga antes de pintar, para evitar parpadeos.
+- Un fondo con imagen la declara en su propio CSS con el selector `html[data-fondo="<id>"] body`, estática (sin animaciones ni `background-attachment: fixed`) y como imagen incrustada (`data:`), porque la app no carga recursos externos. Las tarjetas, la barra inferior y las hojas tienen fondo sólido, así que el texto siempre se lee sobre color liso.
 - Cada fondo fija un color de acento y un `--texto-sobre-acento` con contraste mínimo 4.5:1 (en el fondo Oscuro supera 9:1), aplicado a botones principales, día seleccionado, pestaña activa y etiquetas.
 - La etiqueta `theme-color` del navegador cambia con el fondo.
 

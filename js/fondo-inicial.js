@@ -11,4 +11,5 @@
   enlace.id = 'enlace-fondo';
   enlace.href = 'css/fondos/' + identificador + '.css';
   document.head.appendChild(enlace);
+  document.documentElement.dataset.fondo = identificador; // los fondos con imagen lo usan como selector
 })();
