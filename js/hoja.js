@@ -1,9 +1,17 @@
 // Hoja inferior para añadir y editar eventos.
+import { crearDialogo } from './dialogo.js';
 import { crearFilaDias } from './dias.js';
-import { crearSelectorHora } from './rueda.js';
-import { ajustarPorFin, ajustarPorInicio, construirEvento, DURACION_POR_DEFECTO, INICIO_POR_DEFECTO } from './nucleo.js';
+import { crearParHoras } from './horas.js';
+import { crearSegmentado } from './segmentado.js';
+import { crearElemento } from './dom.js';
+import {
+  construirEvento, DURACION_POR_DEFECTO, INICIO_POR_DEFECTO,
+  REPETICION_INDEFINIDO, REPETICION_UNA_VEZ,
+} from './nucleo.js';
+import { ordenarTurnos } from './turnos.js';
+import { formatearHora } from './tiempo.js';
 
-export function crearHoja({ alGuardar, alBorrar }) {
+export function crearHoja({ alGuardar, alBorrar, obtenerTurnos }) {
   const capa = document.getElementById('capa-hoja');
   const hoja = document.getElementById('hoja');
   const titulo = document.getElementById('titulo-hoja');
@@ -11,28 +19,42 @@ export function crearHoja({ alGuardar, alBorrar }) {
   const botonNota = document.getElementById('hoja-boton-nota');
   const campoNota = document.getElementById('hoja-nota');
   const botonBorrar = document.getElementById('hoja-borrar');
+  const contenedorTurnos = document.getElementById('hoja-turnos');
 
   let idEditando = null;
   let diaElegido = 0;
-  let elementoPrevio = null;
+  let repeticionElegida = REPETICION_INDEFINIDO;
+  let semanaDestino = null; // lunes de la semana (solo importa para "Por una vez")
 
   // --- Componentes ---
+  const dialogo = crearDialogo({ capa, caja: hoja });
   const filaDias = crearFilaDias(document.getElementById('hoja-dias'), (dia) => { diaElegido = dia; });
-  const selectorInicio = crearSelectorHora({ nombre: 'inicio', alCambiar: alMoverInicio });
-  const selectorFin = crearSelectorHora({ nombre: 'fin', alCambiar: alMoverFin });
-  document.getElementById('hoja-selector-inicio').replaceWith(selectorInicio.elemento);
-  document.getElementById('hoja-selector-fin').replaceWith(selectorFin.elemento);
+  const segmentado = crearSegmentado(document.getElementById('hoja-repeticion'), (valor) => { repeticionElegida = valor; });
+  const horas = crearParHoras({
+    lugarInicio: document.getElementById('hoja-selector-inicio'),
+    lugarFin: document.getElementById('hoja-selector-fin'),
+  });
 
-  // --- Reglas de horas (la lógica vive en nucleo.js) ---
-  function alMoverInicio(inicio) {
-    const horas = ajustarPorInicio(inicio, selectorFin.obtener());
-    if (horas.inicio !== inicio) selectorInicio.poner(horas.inicio);
-    if (horas.fin !== selectorFin.obtener()) selectorFin.poner(horas.fin);
+  // --- Turnos: un toque rellena las horas (y el título si está vacío) ---
+  function pintarTurnos() {
+    const turnos = ordenarTurnos(obtenerTurnos());
+    contenedorTurnos.hidden = !turnos.length;
+    contenedorTurnos.replaceChildren(...turnos.map((turno) => {
+      const boton = crearElemento('button', 'chip',
+        turno.nombre + ' · ' + formatearHora(turno.inicio) + '–' + formatearHora(turno.fin));
+      boton.type = 'button';
+      boton.dataset.turno = turno.id;
+      return boton;
+    }));
   }
-  function alMoverFin(fin) {
-    const horas = ajustarPorFin(selectorInicio.obtener(), fin);
-    if (horas.fin !== fin) selectorFin.poner(horas.fin);
-  }
+  contenedorTurnos.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('[data-turno]');
+    if (!boton) return;
+    const turno = obtenerTurnos().find((actual) => actual.id === boton.dataset.turno);
+    if (!turno) return;
+    horas.poner(turno.inicio, turno.fin);
+    if (!campoTitulo.value.trim()) campoTitulo.value = turno.nombre;
+  });
 
   // --- Nota opcional ---
   function mostrarNota(visible) {
@@ -45,58 +67,60 @@ export function crearHoja({ alGuardar, alBorrar }) {
     campoNota.focus();
   });
 
-  // --- Abrir y cerrar ---
-  function abrir({ evento = null, dia }) {
-    elementoPrevio = document.activeElement;
+  // --- Abrir y guardar ---
+  // evento: edita uno existente · borrador: datos para uno nuevo ("Crear ahora")
+  // dia y semana: valores por defecto según la pantalla desde la que se abre
+  function abrir({ evento = null, borrador = null, dia, semana }) {
+    const base = evento || borrador;
     idEditando = evento ? evento.id : null;
-    diaElegido = evento ? evento.dia : dia;
+    diaElegido = base ? base.dia : dia;
+    repeticionElegida = base ? base.repeticion : REPETICION_INDEFINIDO;
+    semanaDestino = (base && base.semana) || semana;
 
     titulo.textContent = evento ? 'Editar evento' : 'Nuevo evento';
-    campoTitulo.value = evento ? evento.titulo : '';
+    campoTitulo.value = base ? base.titulo : '';
     campoNota.value = evento ? evento.nota : '';
     mostrarNota(Boolean(evento && evento.nota));
     botonBorrar.hidden = !evento;
 
     filaDias.poner(diaElegido);
-    selectorInicio.poner(evento ? evento.inicio : INICIO_POR_DEFECTO);
-    selectorFin.poner(evento ? evento.fin : INICIO_POR_DEFECTO + DURACION_POR_DEFECTO);
+    segmentado.poner(repeticionElegida);
+    pintarTurnos();
+    horas.poner(
+      base ? base.inicio : INICIO_POR_DEFECTO,
+      base ? base.fin : INICIO_POR_DEFECTO + DURACION_POR_DEFECTO,
+    );
 
-    capa.inert = false;
-    capa.classList.add('abierta');
     // Evento nuevo: teclado listo para escribir. Edición: foco en la hoja.
-    if (evento) hoja.focus({ preventScroll: true });
-    else campoTitulo.focus({ preventScroll: true });
-  }
-
-  function cerrar() {
-    if (!capa.classList.contains('abierta')) return;
-    capa.classList.remove('abierta');
-    capa.inert = true;
-    if (elementoPrevio && elementoPrevio.focus) elementoPrevio.focus({ preventScroll: true });
+    dialogo.abrir(evento ? hoja : campoTitulo);
   }
 
   function guardar() {
+    const { inicio, fin } = horas.obtener();
+    // Un evento guardado a mano no conserva la marca de plan
     const evento = construirEvento({
       id: idEditando,
       titulo: campoTitulo.value,
       dia: diaElegido,
-      inicio: selectorInicio.obtener(),
-      fin: selectorFin.obtener(),
+      inicio,
+      fin,
       nota: campoNota.hidden ? '' : campoNota.value,
+      repeticion: repeticionElegida,
+      semana: repeticionElegida === REPETICION_UNA_VEZ ? semanaDestino : undefined,
     });
-    cerrar();
+    dialogo.cerrar();
     alGuardar(evento);
   }
 
   function borrar() {
     const id = idEditando;
-    cerrar();
+    dialogo.cerrar();
     if (id) alBorrar(id);
   }
 
   // --- Eventos ---
   document.getElementById('hoja-guardar').addEventListener('click', guardar);
-  document.getElementById('hoja-cancelar').addEventListener('click', cerrar);
+  document.getElementById('hoja-cancelar').addEventListener('click', dialogo.cerrar);
   botonBorrar.addEventListener('click', borrar);
 
   // Intro en el título guarda el evento
@@ -107,32 +131,5 @@ export function crearHoja({ alGuardar, alBorrar }) {
     }
   });
 
-  // Tocar fuera de la hoja cierra sin guardar
-  capa.addEventListener('click', (evento) => {
-    if (evento.target === capa) cerrar();
-  });
-
-  // Esc cierra; Tab se mantiene dentro de la hoja
-  capa.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Escape') {
-      evento.preventDefault();
-      cerrar();
-      return;
-    }
-    if (evento.key !== 'Tab') return;
-    const enfocables = [...hoja.querySelectorAll('button, input, textarea, [tabindex="0"]')]
-      .filter((elemento) => !elemento.hidden && !elemento.disabled);
-    if (!enfocables.length) return;
-    const primero = enfocables[0];
-    const ultimo = enfocables[enfocables.length - 1];
-    if (evento.shiftKey && (document.activeElement === primero || document.activeElement === hoja)) {
-      evento.preventDefault();
-      ultimo.focus();
-    } else if (!evento.shiftKey && document.activeElement === ultimo) {
-      evento.preventDefault();
-      primero.focus();
-    }
-  });
-
-  return { abrir, cerrar };
+  return { abrir, cerrar: dialogo.cerrar };
 }

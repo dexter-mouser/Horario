@@ -54,7 +54,10 @@ button { cursor: pointer; }
 .titulo-pantalla { margin: 0; font-size: 1.75rem; line-height: 1.2; }
 .fecha { margin: 2px 0 16px; color: var(--texto-suave); }
 .subtitulo { margin: 0 0 12px; font-size: 1rem; }
-#pantalla-semana > header, #pantalla-ajustes > header { margin-bottom: 16px; }
+#pantalla-ajustes > header { margin-bottom: 16px; }
+.encabezado-fila { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.encabezado-fila .fecha { margin-bottom: 16px; }
+.texto-suave { margin: 0 0 12px; color: var(--texto-suave); font-size: .9rem; }
 
 /* ---------- Barra inferior ---------- */
 .barra {
@@ -69,7 +72,7 @@ button { cursor: pointer; }
   flex: 1; min-height: 52px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   background: transparent; border: 2px solid transparent; border-radius: 14px;
-  color: var(--texto-suave); font-size: .8rem;
+  color: var(--texto-suave); font-size: .75rem;
   transition: color var(--transicion), border-color var(--transicion);
 }
 .boton-barra[aria-current="page"] { color: var(--acento); border-color: var(--acento); }
@@ -113,6 +116,12 @@ button { cursor: pointer; }
 .evento-horas { color: var(--texto-suave); font-variant-numeric: tabular-nums; font-size: .9rem; }
 .evento-titulo { margin-top: 2px; font-weight: 700; overflow-wrap: anywhere; }
 .evento-nota { margin-top: 4px; color: var(--texto-suave); font-size: .9rem; overflow-wrap: anywhere; white-space: pre-line; }
+
+.evento-marcas { display: flex; align-items: center; gap: 6px; }
+.marca-una-vez {
+  color: var(--texto-suave); border: 1px solid var(--borde); border-radius: 999px;
+  font-size: .7rem; padding: 1px 8px; white-space: nowrap;
+}
 
 .mensaje-vacio {
   background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio);
@@ -162,6 +171,14 @@ button { cursor: pointer; }
 .libre { margin: 4px 0 0; color: var(--texto-suave); }
 
 /* ---------- Ajustes ---------- */
+.bloque-ajuste + .bloque-ajuste { margin-top: 12px; }
+.lista-turnos { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.fila-turno {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 48px;
+  background: var(--superficie-2); border: 1px solid var(--borde); border-radius: 12px; padding: 8px 14px; text-align: left;
+}
+.fila-turno-nombre { font-weight: 700; overflow-wrap: anywhere; }
+.fila-turno-horas { color: var(--texto-suave); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .grupo-chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
   min-height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 700;
@@ -238,6 +255,23 @@ textarea.campo { resize: none; margin-top: 4px; }
 }
 .boton-primario { flex: 1; background: var(--acento); border-color: var(--acento); color: var(--texto-sobre-acento); }
 .boton-peligro { color: var(--peligro); border-color: var(--peligro); }
+
+/* ---------- Repetición (segmentado) y plan semanal ---------- */
+.segmentado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.plan-dias { display: flex; flex-direction: column; gap: 8px; }
+.plan-fila { display: grid; grid-template-columns: 6.5rem 1fr; align-items: center; gap: 10px; }
+.plan-fila label { font-weight: 700; }
+.plan-fila .campo { min-height: 48px; padding: 8px 12px; }
+.boton-corto { min-height: 44px; padding: 0 16px; border-radius: 12px; }
+
+/* ---------- Aviso emergente ---------- */
+.capa-centrada { align-items: center; justify-content: center; padding: 16px; z-index: 30; }
+.alerta {
+  width: 100%; max-width: 420px; background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 20px; padding: 20px;
+}
+.alerta:focus { outline: none; }
+.alerta-mensaje { margin: 0 0 4px; overflow-wrap: anywhere; }
 
 /* ---------- Movimiento reducido ---------- */
 @media (prefers-reduced-motion: reduce) {

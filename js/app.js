@@ -1,10 +1,19 @@
 // Arranque y coordinación de pantallas.
 import { aplicarFondo, FONDO_POR_DEFECTO } from './fondos.js';
-import { guardarEventos, guardarFondo, leerEventos, leerFondo } from './almacenamiento.js';
-import { guardarEnLista, quitarDeLista } from './nucleo.js';
-import { diaActual } from './tiempo.js';
+import {
+  guardarEventos, guardarFondo, guardarTurnos, leerEventos, leerFondo, leerTurnos,
+} from './almacenamiento.js';
+import {
+  continuacionDe, debeAvisarFinDeDia, guardarEnLista, limpiarVencidos, quitarDeLista,
+  REPETICION_UNA_VEZ, diaSiguiente,
+} from './nucleo.js';
+import { aplicarPlan } from './turnos.js';
+import { diaActual, lunesDeLaSemana, NOMBRES_DIA, sumarSemanas } from './tiempo.js';
 import { pintarIconos } from './iconos.js';
+import { crearAlerta } from './alerta.js';
 import { crearHoja } from './hoja.js';
+import { crearHojaTurno } from './hoja-turno.js';
+import { crearVistaPlan } from './vista-plan.js';
 import { crearVistaHoy } from './vista-hoy.js';
 import { crearVistaSemana } from './vista-semana.js';
 import { crearVistaAjustes } from './vista-ajustes.js';
@@ -12,6 +21,8 @@ import { crearVistaAjustes } from './vista-ajustes.js';
 // --- Estado de la aplicación ---
 const estado = {
   eventos: leerEventos(),
+  turnos: leerTurnos(),
+  lunes: lunesDeLaSemana(),   // lunes de la semana actual
   diaVisto: diaActual(),
   pantalla: 'hoy',
   fondo: aplicarFondo(leerFondo() || FONDO_POR_DEFECTO),
@@ -20,16 +31,70 @@ const estado = {
 const secciones = {
   hoy: document.getElementById('pantalla-hoy'),
   semana: document.getElementById('pantalla-semana'),
+  proxima: document.getElementById('pantalla-proxima'),
   ajustes: document.getElementById('pantalla-ajustes'),
 };
 const botonesBarra = document.querySelectorAll('.boton-barra');
 
-// --- Acciones ---
-function editarEvento(id) {
-  const evento = estado.eventos.find((actual) => actual.id === id);
-  if (evento) hoja.abrir({ evento, dia: evento.dia });
+const lunesProximo = () => sumarSemanas(estado.lunes, 1);
+// Semana a la que pertenecen los eventos nuevos según la pantalla abierta
+const semanaDeLaPantalla = () => (estado.pantalla === 'proxima' ? lunesProximo() : estado.lunes);
+
+// --- Semanas: los eventos "Por una vez" se pierden al terminar su semana ---
+function purgarVencidos() {
+  const vigentes = limpiarVencidos(estado.eventos, estado.lunes);
+  if (vigentes.length !== estado.eventos.length) {
+    estado.eventos = vigentes;
+    guardarEventos(vigentes);
+  }
 }
 
+// --- Avisos de fin de día (23:55) ---
+function avisarFinDeDia(evento) {
+  const continuacion = continuacionDe(evento, estado.lunes);
+  const siguiente = NOMBRES_DIA[diaSiguiente(evento.dia)].toLowerCase();
+  alerta.mostrar({
+    titulo: 'Fin del día',
+    mensaje: 'Este horario llega hasta las 23:55. Si continúa pasada la medianoche, crea un evento para el '
+      + siguiente + '.',
+    textoAccion: 'Crear ahora',
+    alAccion: continuacion ? () => hoja.abrir({ borrador: continuacion, semana: semanaDeLaPantalla() }) : null,
+  });
+}
+
+function avisarPlanFinDeDia(dias) {
+  const nombres = dias.map((dia) => NOMBRES_DIA[dia]).join(', ');
+  alerta.mostrar({
+    titulo: 'Fin del día',
+    mensaje: 'Estos días terminan a las 23:55: ' + nombres
+      + '. Si continúan pasada la medianoche, crea los eventos del día siguiente.',
+  });
+}
+
+// --- Acciones: eventos ---
+function editarEvento(id) {
+  const evento = estado.eventos.find((actual) => actual.id === id);
+  if (evento) hoja.abrir({ evento, dia: evento.dia, semana: semanaDeLaPantalla() });
+}
+
+function guardarEvento(evento) {
+  const previo = estado.eventos.find((actual) => actual.id === evento.id);
+  estado.eventos = guardarEnLista(estado.eventos, evento);
+  guardarEventos(estado.eventos);
+  if (estado.pantalla === 'hoy' && (evento.repeticion !== REPETICION_UNA_VEZ || evento.semana === estado.lunes)) {
+    estado.diaVisto = evento.dia; // se muestra el día donde quedó
+  }
+  pintarActual();
+  if (debeAvisarFinDeDia(previo, evento)) avisarFinDeDia(evento);
+}
+
+function borrarEvento(id) {
+  estado.eventos = quitarDeLista(estado.eventos, id);
+  guardarEventos(estado.eventos);
+  pintarActual();
+}
+
+// --- Acciones: navegación ---
 function elegirDia(dia) {
   estado.diaVisto = dia;
   pintarActual();
@@ -40,36 +105,70 @@ function irADia(dia) {
   cambiarPantalla('hoy');
 }
 
-function guardarEvento(evento) {
-  estado.eventos = guardarEnLista(estado.eventos, evento);
-  guardarEventos(estado.eventos);
-  if (estado.pantalla === 'hoy') estado.diaVisto = evento.dia; // se muestra el día donde quedó
-  pintarActual();
-}
-
-function borrarEvento(id) {
-  estado.eventos = quitarDeLista(estado.eventos, id);
-  guardarEventos(estado.eventos);
-  pintarActual();
-}
-
+// --- Acciones: fondo y turnos ---
 function elegirFondo(identificador) {
   estado.fondo = aplicarFondo(identificador);
   guardarFondo(estado.fondo);
-  vistaAjustes.pintar(estado.fondo);
+  vistaAjustes.pintar(estado.fondo, estado.turnos);
+}
+
+function guardarTurno(turno) {
+  estado.turnos = guardarEnLista(estado.turnos, turno);
+  guardarTurnos(estado.turnos);
+  vistaAjustes.pintar(estado.fondo, estado.turnos);
+}
+
+function borrarTurno(id) {
+  estado.turnos = quitarDeLista(estado.turnos, id);
+  guardarTurnos(estado.turnos);
+  vistaAjustes.pintar(estado.fondo, estado.turnos);
+}
+
+function editarTurno(id) {
+  const turno = estado.turnos.find((actual) => actual.id === id);
+  if (turno) hojaTurno.abrir(turno);
+}
+
+// --- Acciones: planificar semana ---
+function abrirPlan(desplazamiento) {
+  vistaPlan.abrir({
+    lunes: desplazamiento === 0 ? estado.lunes : lunesProximo(),
+    textoTitulo: desplazamiento === 0 ? 'Planificar semana actual' : 'Planificar semana próxima',
+  });
+}
+
+function aplicarPlanSemanal({ asignaciones, repeticion, semana }) {
+  const resultado = aplicarPlan(estado.eventos, asignaciones, estado.turnos, repeticion, semana);
+  estado.eventos = resultado.eventos;
+  guardarEventos(estado.eventos);
+  pintarActual();
+  if (resultado.diasFinDeDia.length) avisarPlanFinDeDia(resultado.diasFinDeDia);
 }
 
 // --- Componentes ---
-const hoja = crearHoja({ alGuardar: guardarEvento, alBorrar: borrarEvento });
+const alerta = crearAlerta();
+const hoja = crearHoja({ alGuardar: guardarEvento, alBorrar: borrarEvento, obtenerTurnos: () => estado.turnos });
+const hojaTurno = crearHojaTurno({ alGuardar: guardarTurno, alBorrar: borrarTurno });
+const vistaPlan = crearVistaPlan({ obtenerTurnos: () => estado.turnos, alAplicar: aplicarPlanSemanal });
 const vistaHoy = crearVistaHoy({ alEditar: editarEvento, alElegirDia: elegirDia });
-const vistaSemana = crearVistaSemana({ alEditar: editarEvento, alIrADia: irADia });
-const vistaAjustes = crearVistaAjustes({ alElegirFondo: elegirFondo });
+const vistaSemana = crearVistaSemana({
+  idLista: 'lista-semana', idRango: 'rango-semana', desplazamiento: 0, alEditar: editarEvento, alIrADia: irADia,
+});
+const vistaProxima = crearVistaSemana({
+  idLista: 'lista-proxima', idRango: 'rango-proxima', desplazamiento: 1, alEditar: editarEvento, alIrADia: null,
+});
+const vistaAjustes = crearVistaAjustes({
+  alElegirFondo: elegirFondo,
+  alNuevoTurno: () => hojaTurno.abrir(),
+  alEditarTurno: editarTurno,
+});
 
 // --- Pintado: solo se dibuja la pantalla visible ---
 function pintarActual() {
   if (estado.pantalla === 'hoy') vistaHoy.pintar(estado.eventos, estado.diaVisto);
   else if (estado.pantalla === 'semana') vistaSemana.pintar(estado.eventos);
-  else vistaAjustes.pintar(estado.fondo);
+  else if (estado.pantalla === 'proxima') vistaProxima.pintar(estado.eventos);
+  else vistaAjustes.pintar(estado.fondo, estado.turnos);
 }
 
 function cambiarPantalla(nombre) {
@@ -79,23 +178,34 @@ function cambiarPantalla(nombre) {
     if (boton.dataset.pantalla === nombre) boton.setAttribute('aria-current', 'page');
     else boton.removeAttribute('aria-current');
   });
+  revisarSemana();
   pintarActual();
   programarReloj();
 }
 
-// --- Reloj: actualiza la etiqueta "Ahora" cada minuto (solo en Hoy y con la app visible) ---
+// --- Reloj: cada minuto actualiza "Ahora" y detecta el cambio de semana (lunes 00:00) ---
+function revisarSemana() {
+  const lunes = lunesDeLaSemana();
+  if (lunes === estado.lunes) return false;
+  estado.lunes = lunes;   // la semana próxima pasa a ser la actual
+  purgarVencidos();       // se pierden los "Por una vez" de la semana que terminó
+  return true;
+}
+
 let temporizadorReloj = 0;
 function programarReloj() {
   clearTimeout(temporizadorReloj);
-  if (estado.pantalla !== 'hoy' || document.hidden) return;
+  if (document.hidden) return;
   const espera = 60000 - (Date.now() % 60000) + 50;
   temporizadorReloj = setTimeout(() => {
-    pintarActual();
+    const cambioSemana = revisarSemana();
+    if (cambioSemana || estado.pantalla === 'hoy') pintarActual();
     programarReloj();
   }, espera);
 }
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
+    revisarSemana();
     pintarActual();
     programarReloj();
   }
@@ -105,9 +215,15 @@ document.addEventListener('visibilitychange', () => {
 botonesBarra.forEach((boton) => {
   boton.addEventListener('click', () => cambiarPantalla(boton.dataset.pantalla));
 });
-document.getElementById('boton-anadir').addEventListener('click', () => hoja.abrir({ dia: estado.diaVisto }));
+document.querySelectorAll('[data-planificar]').forEach((boton) => {
+  boton.addEventListener('click', () => abrirPlan(Number(boton.dataset.planificar)));
+});
+document.getElementById('boton-anadir').addEventListener('click', () => {
+  hoja.abrir({ dia: estado.diaVisto, semana: semanaDeLaPantalla() });
+});
 
 // --- Inicio ---
+purgarVencidos();
 pintarIconos(document);
 cambiarPantalla('hoy');
 

@@ -1,7 +1,7 @@
-// Service worker: guarda la app en caché y la sirve sin conexión.
-// Estrategia: responde desde caché al instante y actualiza en segundo plano.
-// Si cambia la lista de archivos, cambia también NOMBRE_CACHE.
-const NOMBRE_CACHE = 'horario-cache-1';
+// Service worker: guarda la app en una única caché y la sirve sin conexión.
+// Estrategia: responde desde la caché al instante y actualiza en segundo plano,
+// por lo que el nombre de la caché no necesita cambiar.
+const NOMBRE_CACHE = 'horario-cache';
 const ARCHIVOS = [
   './',
   'index.html',
@@ -9,18 +9,25 @@ const ARCHIVOS = [
   'css/style.css',
   'css/fondos/oscuro.css',
   'js/app.js',
+  'js/alerta.js',
   'js/almacenamiento.js',
+  'js/dialogo.js',
   'js/dias.js',
   'js/dom.js',
   'js/fondo-inicial.js',
   'js/fondos.js',
   'js/hoja.js',
+  'js/hoja-turno.js',
+  'js/horas.js',
   'js/iconos.js',
   'js/nucleo.js',
   'js/rueda.js',
+  'js/segmentado.js',
   'js/tiempo.js',
+  'js/turnos.js',
   'js/vista-ajustes.js',
   'js/vista-hoy.js',
+  'js/vista-plan.js',
   'js/vista-semana.js',
   'img/icono.svg',
   'img/icono-192.png',

@@ -1,8 +1,8 @@
 // Pantalla "Hoy": eventos del día elegido.
 import { crearElemento } from './dom.js';
 import { crearFilaDias } from './dias.js';
-import { eventosDelDia, estaAhora } from './nucleo.js';
-import { diaActual, formatearHora, minutosAhora, NOMBRES_DIA, textoFechaHoy } from './tiempo.js';
+import { eventosDelDia, estaAhora, REPETICION_UNA_VEZ } from './nucleo.js';
+import { diaActual, formatearHora, lunesDeLaSemana, minutosAhora, NOMBRES_DIA, textoFechaHoy } from './tiempo.js';
 
 export function crearVistaHoy({ alEditar, alElegirDia }) {
   const titulo = document.getElementById('titulo-hoy');
@@ -24,7 +24,10 @@ export function crearVistaHoy({ alEditar, alElegirDia }) {
 
     const cabecera = crearElemento('div', 'evento-cabecera');
     cabecera.append(crearElemento('span', 'evento-horas', formatearHora(evento.inicio) + ' – ' + formatearHora(evento.fin)));
-    if (esAhora) cabecera.append(crearElemento('span', 'etiqueta', 'Ahora'));
+    const marcas = crearElemento('span', 'evento-marcas');
+    if (evento.repeticion === REPETICION_UNA_VEZ) marcas.append(crearElemento('span', 'marca-una-vez', 'Una vez'));
+    if (esAhora) marcas.append(crearElemento('span', 'etiqueta', 'Ahora'));
+    cabecera.append(marcas);
 
     boton.append(cabecera, crearElemento('div', 'evento-titulo', evento.titulo));
     if (evento.nota) boton.append(crearElemento('div', 'evento-nota', evento.nota));
@@ -38,7 +41,7 @@ export function crearVistaHoy({ alEditar, alElegirDia }) {
     fecha.textContent = textoFechaHoy();
     filaDias.poner(diaVisto);
 
-    const delDia = eventosDelDia(eventos, diaVisto);
+    const delDia = eventosDelDia(eventos, diaVisto, lunesDeLaSemana());
     const ahora = minutosAhora();
     const fragmento = document.createDocumentFragment();
 
