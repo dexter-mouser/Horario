@@ -7,6 +7,7 @@ const ARCHIVOS = [
   'index.html',
   'manifest.webmanifest',
   'css/style.css',
+  'css/fondos/vaquero.css',
   'css/fondos/aurora.css',
   'css/fondos/oscuro.css',
   'js/app.js',

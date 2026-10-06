@@ -2,6 +2,7 @@
 export const FONDOS = [
   { id: 'oscuro', nombre: 'Oscuro', colorBarra: '#02060f' },
   { id: 'aurora', nombre: 'Aurora', colorBarra: '#060b14' },
+  { id: 'vaquero', nombre: 'Vaquero', colorBarra: '#1c1209'},
 ];
 export const FONDO_POR_DEFECTO = 'oscuro';
 

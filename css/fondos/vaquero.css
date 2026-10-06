@@ -1,0 +1,23 @@
+/* Fondo "Vaquero": desierto al atardecer con sol, mesas, cactus y un vaquero.
+   Estático: sin animaciones ni background-attachment: fixed (iPhone). */
+:root {
+    --fondo: #1c1209;
+    --superficie: #2b1d10;
+    --superficie-2: #3a2815;
+    --borde: #5a4128;
+    --texto: #f7ecd9;
+    --texto-suave: #c9b392;
+    --acento: #e0a23a;
+    --texto-sobre-acento: #1c1209;
+    --peligro: #ff8a70;
+}
+
+html[data-fondo="vaquero"] body {
+    min-height: 100dvh;
+    background-color: var(--fondo);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 420'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%231c1209' stop-opacity='0'/%3E%3Cstop offset='.45' stop-color='%23703512' stop-opacity='.8'/%3E%3Cstop offset='.8' stop-color='%23d4701f'/%3E%3Cstop offset='1' stop-color='%23e0a23a'/%3E%3C/linearGradient%3E%3CradialGradient id='s'%3E%3Cstop offset='.55' stop-color='%23e0a23a' stop-opacity='.4'/%3E%3Cstop offset='1' stop-color='%23e0a23a' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='400' height='340' fill='url(%23c)'/%3E%3Ccircle cx='270' cy='290' r='125' fill='url(%23s)'/%3E%3Ccircle cx='270' cy='290' r='62' fill='%23f6c35a'/%3E%3Cpath fill='%236b2e12' d='M0 335V305h34l6-16h56l6 16h22v30zM214 335v-26h26l6-14h48l6 14h32v26zM350 335v-20h20l5-9h25v29z'/%3E%3Cpath fill='%233a1a0a' d='M0 345Q90 328 200 342T400 336V420H0z'/%3E%3Cpath fill='%23170c05' d='M0 380Q120 360 230 376T400 366V420H0z'/%3E%3Cg fill='%230d0703'%3E%3Crect x='62' y='250' width='18' height='160' rx='9'/%3E%3Crect x='36' y='300' width='26' height='12' rx='6'/%3E%3Crect x='36' y='270' width='12' height='42' rx='6'/%3E%3Crect x='80' y='320' width='26' height='12' rx='6'/%3E%3Crect x='94' y='288' width='12' height='44' rx='6'/%3E%3Crect x='326' y='335' width='9' height='60' rx='4.5'/%3E%3Crect x='312' y='352' width='14' height='7' rx='3.5'/%3E%3Crect x='312' y='340' width='7' height='19' rx='3.5'/%3E%3Crect x='335' y='360' width='14' height='7' rx='3.5'/%3E%3Crect x='342' y='348' width='7' height='19' rx='3.5'/%3E%3Crect x='256' y='356' width='4' height='17'/%3E%3Crect x='262' y='356' width='4' height='17'/%3E%3Crect x='255' y='338' width='12' height='20' rx='3'/%3E%3Ccircle cx='261' cy='334' r='4.5'/%3E%3Cellipse cx='261' cy='331' rx='11' ry='2.5'/%3E%3Crect x='256' y='322' width='10' height='9' rx='3'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    /* la escena queda justo encima de la barra inferior (80px + área segura) */
+    background-position: center calc(100% - 80px - env(safe-area-inset-bottom, 0px));
+}

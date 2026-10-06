@@ -53,7 +53,7 @@ La navegación es una barra inferior con cuatro pestañas: **Hoy**, **Semana**, 
 
 ### 2.4 Ajustes
 
-- **Fondo**: opciones **Oscuro** (liso) y **Aurora** (aurora boreal sobre montañas y lago). Cada fondo tiene su propio archivo CSS y se puede añadir otro sin tocar el resto de la app.
+- **Fondo**: opciones **Oscuro** (liso) y **Aurora** (aurora boreal sobre montañas y lago)**Vaquero**(paisaje del viejo oeste). Cada fondo tiene su propio archivo CSS y se puede añadir otro sin tocar el resto de la app.
 - **Turnos**: lista de turnos guardados (nombre y horario). Tocar uno lo edita; **+ Añadir turno** crea uno nuevo (hasta 12). Ver 7.
 - Las elecciones se recuerdan al volver a abrir la aplicación.
 
