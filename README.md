@@ -232,6 +232,8 @@ horario/
 │   ├── style.css              Estructura y componentes (solo variables de color)
 │   └── fondos/
 │       └── oscuro.css         Valores del fondo oscuro
+│       └── aurora.css         Aurora boreal sobre montañas y lago
+│       └── vaquero.css        Fondo del lejano Oeste
 ├── js/
 │   ├── fondo-inicial.js       Carga el fondo guardado antes de pintar
 │   ├── app.js                 Arranque, estado, semanas y navegación
