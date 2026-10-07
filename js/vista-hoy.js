@@ -1,14 +1,27 @@
 // Pantalla "Hoy": eventos del día elegido.
 import { crearElemento } from './dom.js';
 import { crearFilaDias } from './dias.js';
+import { ponerIcono } from './iconos.js';
 import { eventosDelDia, estaAhora, REPETICION_UNA_VEZ } from './nucleo.js';
 import { diaActual, formatearHora, lunesDeLaSemana, minutosAhora, NOMBRES_DIA, textoFechaHoy } from './tiempo.js';
 
-export function crearVistaHoy({ alEditar, alElegirDia }) {
+export function crearVistaHoy({ alEditar, alElegirDia, alCambiarModo }) {
   const titulo = document.getElementById('titulo-hoy');
   const fecha = document.getElementById('fecha-hoy');
   const lista = document.getElementById('lista-hoy');
   const filaDias = crearFilaDias(document.getElementById('fila-dias-hoy'), alElegirDia);
+  const botonModo = document.getElementById('boton-modo');
+  botonModo.addEventListener('click', alCambiarModo);
+
+  // Muestra el icono de la acción: en modo oscuro ofrece pasar a claro y al revés.
+  // Con una escena de fondo (paleta propia) el botón se oculta.
+  function pintarBotonModo({ visible, modoResuelto }) {
+    botonModo.hidden = !visible;
+    const aClaro = modoResuelto === 'oscuro';
+    const etiqueta = aClaro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+    botonModo.setAttribute('aria-label', etiqueta);
+    ponerIcono(botonModo, aClaro ? 'sol' : 'luna', etiqueta);
+  }
 
   // Un solo escuchador para toda la lista
   lista.addEventListener('click', (evento) => {
@@ -52,5 +65,5 @@ export function crearVistaHoy({ alEditar, alElegirDia }) {
     lista.replaceChildren(fragmento);
   }
 
-  return { pintar };
+  return { pintar, pintarBotonModo };
 }

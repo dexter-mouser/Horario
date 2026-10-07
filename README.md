@@ -17,6 +17,7 @@ Aplicación web para consultar y modificar tu horario semanal desde el celular. 
 - Añadir, editar y borrar eventos, indicando si se repiten cada semana o valen una sola vez.
 - Guardar turnos predefinidos y planificar una semana completa con ellos.
 - Recibir un aviso cuando un evento llega hasta el final del día.
+- Elegir modo claro u oscuro (o seguir al sistema) y el color de acento.
 - Cambiar el fondo de la aplicación.
 
 ---
@@ -27,7 +28,7 @@ La navegación es una barra inferior con cuatro pestañas: **Hoy**, **Semana**, 
 
 ### 2.1 Hoy
 
-- Arriba: la fecha completa y una fila de siete botones **L M X J V S D**. Al abrir queda marcado el día actual.
+- Arriba: la fecha completa, un botón redondo para alternar entre modo claro y oscuro (solo con el fondo Estándar) y una fila de siete botones **L M X J V S D**. Al abrir queda marcado el día actual.
 - Debajo: los eventos del día elegido, de la hora más temprana a la más tardía.
 - Cada evento muestra su rango de horas, su título y, si la tiene, su nota. Los eventos de una sola vez llevan la etiqueta **Una vez**.
 - Si se está viendo el día de hoy y la hora actual cae dentro de un evento (inicio incluido, fin excluido), ese evento se resalta con la etiqueta **Ahora**. La marca se actualiza cada minuto mientras la app está visible.
@@ -53,9 +54,11 @@ La navegación es una barra inferior con cuatro pestañas: **Hoy**, **Semana**, 
 
 ### 2.4 Ajustes
 
-- **Fondo**: opciones **Oscuro** (liso) y **Aurora** (aurora boreal sobre montañas y lago)**Vaquero**(paisaje del viejo oeste). Cada fondo tiene su propio archivo CSS y se puede añadir otro sin tocar el resto de la app.
+- **Modo**: **Sistema** (por defecto, sigue la preferencia del dispositivo), **Claro** u **Oscuro**.
+- **Acento**: cinco colores predefinidos (un neutro, **Grafito**, y cuatro brillantes: **Azul**, **Lima**, **Naranja** y **Magenta**) y un selector de **color libre**. Debajo se muestra el nombre y el código del color elegido.
+- **Fondo**: **Estándar** (modo y acento personalizables) o una escena con su propia paleta, como **Aurora**. Con una escena, las opciones de modo y acento se desactivan y el botón de modo de la pantalla Hoy se oculta.
 - **Turnos**: lista de turnos guardados (nombre y horario). Tocar uno lo edita; **+ Añadir turno** crea uno nuevo (hasta 12). Ver 7.
-- Las elecciones se recuerdan al volver a abrir la aplicación.
+- Todas las elecciones se recuerdan al volver a abrir la aplicación.
 
 ---
 
@@ -161,15 +164,27 @@ Cada turno tiene `id`, `nombre` (máx. 30 caracteres), `inicio` y `fin` con las 
 
 ---
 
-## 8. Fondos y colores
+## 8. Tema, colores y contraste
 
-- Los colores se definen con variables CSS: `--fondo`, `--superficie`, `--superficie-2`, `--texto`, `--texto-suave`, `--borde`, `--acento`, `--texto-sobre-acento`, `--peligro`.
-- `style.css` contiene solo la estructura y usa únicamente esas variables. Cada fondo (`css/fondos/oscuro.css`) solo define los valores.
-- **Añadir un fondo**: crear `css/fondos/<id>.css` con las mismas variables, registrarlo en `js/fondos.js` y añadirlo a la lista de archivos de `sw.js`.
-- El fondo activo se carga antes de pintar, para evitar parpadeos.
-- Un fondo con imagen la declara en su propio CSS con el selector `html[data-fondo="<id>"] body`, estática (sin animaciones ni `background-attachment: fixed`) y como imagen incrustada (`data:`), porque la app no carga recursos externos. Las tarjetas, la barra inferior y las hojas tienen fondo sólido, así que el texto siempre se lee sobre color liso.
-- Cada fondo fija un color de acento y un `--texto-sobre-acento` con contraste mínimo 4.5:1 (en el fondo Oscuro supera 9:1), aplicado a botones principales, día seleccionado, pestaña activa y etiquetas.
-- La etiqueta `theme-color` del navegador cambia con el fondo.
+**Variables.** Los colores se definen con variables CSS: `--fondo`, `--superficie`, `--superficie-2`, `--borde`, `--borde-fuerte`, `--texto`, `--texto-suave`, `--peligro`, `--acento`, `--texto-sobre-acento` y `--acento-texto`. `style.css` contiene solo la estructura y usa únicamente esas variables; cada fondo (`css/fondos/<id>.css`) solo define los valores.
+
+**Modo claro y oscuro.**
+- Sin elección manual, el fondo Estándar sigue la preferencia del sistema (`prefers-color-scheme`) y cambia en vivo si el dispositivo cambia de modo.
+- Al elegir **Claro** u **Oscuro** (en Ajustes o con el botón de la pantalla Hoy) la app marca `data-tema` en `<html>` y deja de seguir al sistema. **Sistema** vuelve a seguirlo.
+- La etiqueta `theme-color` del navegador toma el color de fondo del modo activo.
+
+**Acento.**
+- Se usa como relleno en el botón +, el botón principal de cada hoja, el día seleccionado, las etiquetas y los rótulos I y F; y, ajustado para el contraste, en iconos activos, bordes destacados, enlaces y la franja de ocupación.
+- Se guarda en `localStorage` junto con sus valores ya calculados, y se aplica antes de pintar para evitar parpadeos.
+
+**Contraste dinámico.** Al elegir un acento (predefinido o libre) la app calcula automáticamente:
+- `--texto-sobre-acento`: texto oscuro o blanco, el que dé al menos 4.5:1 sobre el acento.
+- `--acento-texto`: el acento acercado al blanco (modo oscuro) o al negro (modo claro) hasta lograr 4.5:1 sobre las superficies, para usarlo como texto, icono o borde.
+- `--borde-fuerte`: contorno de campos, botones y chips con al menos 3:1 sobre el fondo.
+
+**Escenas de fondo.** Un fondo con imagen declara su paleta en su propio CSS y la imagen con el selector `html[data-fondo="<id>"] body`, estática (sin animaciones ni `background-attachment: fixed`) y como imagen incrustada (`data:`), porque la app no carga recursos externos. Las tarjetas, la barra inferior y las hojas tienen fondo sólido, así que el texto siempre se lee sobre color liso. Las escenas no usan el modo ni el acento elegidos.
+
+**Añadir un fondo**: crear `css/fondos/<id>.css` con las variables, registrarlo en `js/fondos.js` y, si es una escena opcional, añadir su archivo a `FONDOS_OPCIONALES` en `sw.js`.
 
 ---
 
@@ -177,9 +192,10 @@ Cada turno tiene `id`, `nombre` (máx. 30 caracteres), `inicio` y `fin` con las 
 
 - **Gráficos**: icono de la app en `img/icono.svg`. El resto de iconos son SVG en línea que heredan el color del tema (`currentColor`).
 - **Tipografía**: solo fuentes del sistema.
+- Los iconos del botón de modo y de la barra cambian de forma o color con el estado, no solo de color: el botón de modo muestra un sol o una luna y la muestra de acento elegida lleva un anillo.
 - **aria-label** en todos los SVG; botones y pestañas con nombre accesible; pestaña activa con `aria-current`.
 - La hoja de evento, la de turno, la de planificación y el aviso son diálogos modales: foco dentro mientras están abiertos, **Esc** los cierra y el foco vuelve al elemento que los abrió. El aviso es un diálogo de alerta.
-- Contraste suficiente en el fondo disponible (texto sobre fondo > 15:1).
+- Contraste mínimo 4.5:1 para el texto en ambos modos y con cualquier acento; contornos de controles con al menos 3:1.
 - **Áreas seguras** (notch y barra inferior) con `env(safe-area-inset-*)`.
 - Transiciones CSS breves que se desactivan con `prefers-reduced-motion`.
 - Objetivos táctiles de al menos 44 px.
@@ -205,6 +221,7 @@ Cada turno tiene `id`, `nombre` (máx. 30 caracteres), `inicio` y `fin` con las 
 - `sw.js` (service worker): guarda todos los archivos en caché la primera vez, los sirve desde ahí al instante y los actualiza en segundo plano cuando hay conexión.
 - Requiere **HTTPS** (o `localhost`) para instalarse y funcionar sin conexión. Los módulos JavaScript no se cargan abriendo `index.html` directamente desde el disco: se necesita un servidor estático.
 - **iPhone**: Safari → Compartir → "Añadir a pantalla de inicio".
+- En iPhone la barra de estado de la app instalada sigue la apariencia del sistema; si eliges un modo distinto al del dispositivo, esa barra no cambia.
 - **Android**: Chrome → menú → "Instalar aplicación".
 - Se incluyen iconos PNG (192 y 512 px, y uno para iOS) derivados de `img/icono.svg`, porque iOS no admite SVG como icono de pantalla de inicio.
 
@@ -231,20 +248,20 @@ horario/
 ├── css/
 │   ├── style.css              Estructura y componentes (solo variables de color)
 │   └── fondos/
-│       └── oscuro.css         Valores del fondo oscuro
-│       └── aurora.css         Aurora boreal sobre montañas y lago
-│       └── vaquero.css        Fondo del lejano Oeste
+│       └── estandar.css       Tema adaptable: modo claro, modo oscuro y acento por defecto
 ├── js/
-│   ├── fondo-inicial.js       Carga el fondo guardado antes de pintar
+│   ├── fondo-inicial.js       Aplica fondo, modo y acento guardados antes de pintar
 │   ├── app.js                 Arranque, estado, semanas y navegación
 │   ├── nucleo.js              Reglas de horas, repetición, semanas y avisos (sin DOM)
 │   ├── turnos.js              Turnos y aplicación de planes (sin DOM)
 │   ├── tiempo.js              Días, semanas, conversión minutos <-> "HH:MM"
+│   ├── color.js               Cálculo de contraste y variables del acento (sin DOM)
+│   ├── tema.js                Modo claro/oscuro/sistema y acento
 │   ├── almacenamiento.js      Leer, validar y guardar en localStorage
 │   ├── fondos.js              Lista de fondos y cómo se aplican
-│   ├── vista-hoy.js           Pantalla Hoy
+│   ├── vista-hoy.js           Pantalla Hoy y botón de modo
 │   ├── vista-semana.js        Pantallas Semana y Próxima, franja de ocupación
-│   ├── vista-ajustes.js       Pantalla Ajustes (fondo y turnos)
+│   ├── vista-ajustes.js       Pantalla Ajustes (modo, acento, fondo y turnos)
 │   ├── vista-plan.js          Hoja de planificación semanal
 │   ├── hoja.js                Hoja de añadir/editar evento
 │   ├── hoja-turno.js          Hoja de crear/editar turno
@@ -252,7 +269,7 @@ horario/
 │   ├── dialogo.js             Comportamiento común de las ventanas (foco, Esc)
 │   ├── horas.js               Par de selectores Inicio/Fin con sus reglas
 │   ├── rueda.js               Selector de rueda y selector de hora
-│   ├── segmentado.js          Botones excluyentes (Indefinido | Por una vez)
+│   ├── segmentado.js          Botones excluyentes (Indefinido | Por una vez, modos)
 │   ├── dias.js                Fila de botones L M X J V S D
 │   ├── iconos.js              SVG en línea con aria-label
 │   └── dom.js                 Creación segura de elementos
@@ -263,7 +280,7 @@ horario/
     └── icono-apple.png
 ```
 
-**Separación de responsabilidades**: `nucleo.js`, `turnos.js` y `tiempo.js` contienen la lógica sin tocar el DOM; las vistas y las hojas solo dibujan y recogen datos; `almacenamiento.js` es lo único que habla con `localStorage`.
+**Separación de responsabilidades**: `nucleo.js`, `turnos.js`, `tiempo.js` y `color.js` contienen la lógica sin tocar el DOM; las vistas y las hojas solo dibujan y recogen datos; `almacenamiento.js` es lo único que habla con `localStorage`.
 
 ---
 

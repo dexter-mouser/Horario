@@ -1,0 +1,61 @@
+/* Fondo "Estándar": tema adaptable con modo claro / oscuro y acento personalizable.
+   - Sin elección manual sigue la preferencia del sistema (prefers-color-scheme).
+   - Con elección manual, la app pone data-tema="claro" u "oscuro" en <html>.
+   - El acento lo escribe la app (js/tema.js) como variables en <html>; los valores de
+     este archivo son el acento por defecto (Azul) y se usan si no hay otro guardado.
+   Un fondo solo define variables; la estructura vive en style.css. */
+
+/* ---------- Oscuro (predeterminado) ---------- */
+:root {
+  --acento: #3d8bff;
+  --texto-sobre-acento: #0b0f14;
+  --acento-texto-oscuro: #3d8bff;
+  --acento-texto-claro: #2e68bf;
+
+  --fondo: #0e1014;
+  --superficie: #171a21;
+  --superficie-2: #1f242d;
+  --borde: #2b313d;
+  --borde-fuerte: #6b7487;          /* contorno de controles (>= 3:1) */
+  --texto: #f2f4f8;
+  --texto-suave: #a3acbd;
+  --peligro: #ff7b7b;
+  --acento-texto: var(--acento-texto-oscuro);  /* acento usado como texto, icono o borde */
+  --sombra: 0 6px 18px rgba(0, 0, 0, .5);
+  --sombra-suave: none;
+  color-scheme: dark;
+}
+
+/* ---------- Claro: sistema en claro y sin elección manual ---------- */
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="oscuro"]) {
+    --fondo: #f4f5f8;
+    --superficie: #ffffff;
+    --superficie-2: #eceef3;
+    --borde: #dcdfe7;
+    --borde-fuerte: #7a8296;
+    --texto: #14171d;
+    --texto-suave: #525b6e;
+    --peligro: #c4272d;
+    --acento-texto: var(--acento-texto-claro);
+    --sombra: 0 6px 16px rgba(20, 30, 50, .25);
+    --sombra-suave: 0 1px 2px rgba(20, 30, 50, .08);
+    color-scheme: light;
+  }
+}
+
+/* ---------- Claro: elección manual (mismos valores que el bloque anterior) ---------- */
+:root[data-tema="claro"] {
+  --fondo: #f4f5f8;
+  --superficie: #ffffff;
+  --superficie-2: #eceef3;
+  --borde: #dcdfe7;
+  --borde-fuerte: #7a8296;
+  --texto: #14171d;
+  --texto-suave: #525b6e;
+  --peligro: #c4272d;
+  --acento-texto: var(--acento-texto-claro);
+  --sombra: 0 6px 16px rgba(20, 30, 50, .25);
+  --sombra-suave: 0 1px 2px rgba(20, 30, 50, .08);
+  color-scheme: light;
+}

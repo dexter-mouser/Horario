@@ -10,6 +10,7 @@ import {
 import { aplicarPlan } from './turnos.js';
 import { diaActual, lunesDeLaSemana, NOMBRES_DIA, sumarSemanas } from './tiempo.js';
 import { pintarIconos } from './iconos.js';
+import { crearTema } from './tema.js';
 import { crearAlerta } from './alerta.js';
 import { crearHoja } from './hoja.js';
 import { crearHojaTurno } from './hoja-turno.js';
@@ -105,23 +106,36 @@ function irADia(dia) {
   cambiarPantalla('hoy');
 }
 
-// --- Acciones: fondo y turnos ---
+// --- Acciones: apariencia ---
 function elegirFondo(identificador) {
   estado.fondo = aplicarFondo(identificador);
   guardarFondo(estado.fondo);
-  vistaAjustes.pintar(estado.fondo, estado.turnos);
+  tema.aplicarFondo(estado.fondo === 'estandar'); // avisa y repinta
 }
 
+// Botón de la cabecera: alterna entre claro y oscuro de forma manual
+function alternarModo() {
+  tema.elegirModo(tema.estado().modoResuelto === 'oscuro' ? 'claro' : 'oscuro');
+}
+
+// Se ejecuta cada vez que cambia el modo, el acento o el fondo
+function refrescarTema() {
+  const { activo, modoResuelto } = tema.estado();
+  vistaHoy.pintarBotonModo({ visible: activo, modoResuelto });
+  pintarAjustes();
+}
+
+// --- Acciones: turnos ---
 function guardarTurno(turno) {
   estado.turnos = guardarEnLista(estado.turnos, turno);
   guardarTurnos(estado.turnos);
-  vistaAjustes.pintar(estado.fondo, estado.turnos);
+  pintarAjustes();
 }
 
 function borrarTurno(id) {
   estado.turnos = quitarDeLista(estado.turnos, id);
   guardarTurnos(estado.turnos);
-  vistaAjustes.pintar(estado.fondo, estado.turnos);
+  pintarAjustes();
 }
 
 function editarTurno(id) {
@@ -146,11 +160,12 @@ function aplicarPlanSemanal({ asignaciones, repeticion, semana }) {
 }
 
 // --- Componentes ---
+const tema = crearTema({ alCambiar: refrescarTema });
 const alerta = crearAlerta();
 const hoja = crearHoja({ alGuardar: guardarEvento, alBorrar: borrarEvento, obtenerTurnos: () => estado.turnos });
 const hojaTurno = crearHojaTurno({ alGuardar: guardarTurno, alBorrar: borrarTurno });
 const vistaPlan = crearVistaPlan({ obtenerTurnos: () => estado.turnos, alAplicar: aplicarPlanSemanal });
-const vistaHoy = crearVistaHoy({ alEditar: editarEvento, alElegirDia: elegirDia });
+const vistaHoy = crearVistaHoy({ alEditar: editarEvento, alElegirDia: elegirDia, alCambiarModo: alternarModo });
 const vistaSemana = crearVistaSemana({
   idLista: 'lista-semana', idRango: 'rango-semana', desplazamiento: 0, alEditar: editarEvento, alIrADia: irADia,
 });
@@ -159,16 +174,22 @@ const vistaProxima = crearVistaSemana({
 });
 const vistaAjustes = crearVistaAjustes({
   alElegirFondo: elegirFondo,
+  alElegirModo: (modo) => tema.elegirModo(modo),
+  alElegirAcento: (color, persistir) => tema.elegirAcento(color, persistir),
   alNuevoTurno: () => hojaTurno.abrir(),
   alEditarTurno: editarTurno,
 });
 
 // --- Pintado: solo se dibuja la pantalla visible ---
+function pintarAjustes() {
+  vistaAjustes.pintar({ fondoActual: estado.fondo, turnos: estado.turnos, tema: tema.estado() });
+}
+
 function pintarActual() {
   if (estado.pantalla === 'hoy') vistaHoy.pintar(estado.eventos, estado.diaVisto);
   else if (estado.pantalla === 'semana') vistaSemana.pintar(estado.eventos);
   else if (estado.pantalla === 'proxima') vistaProxima.pintar(estado.eventos);
-  else vistaAjustes.pintar(estado.fondo, estado.turnos);
+  else pintarAjustes();
 }
 
 function cambiarPantalla(nombre) {
@@ -225,6 +246,7 @@ document.getElementById('boton-anadir').addEventListener('click', () => {
 // --- Inicio ---
 purgarVencidos();
 pintarIconos(document);
+tema.aplicarFondo(estado.fondo === 'estandar');
 cambiarPantalla('hoy');
 
 // Funcionamiento sin conexión (requiere HTTPS o localhost)

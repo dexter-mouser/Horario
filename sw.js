@@ -2,17 +2,24 @@
 // Estrategia: responde desde la caché al instante y actualiza en segundo plano,
 // por lo que el nombre de la caché no necesita cambiar.
 const NOMBRE_CACHE = 'horario-cache';
+// Archivos de fondos opcionales: se guardan si existen y su ausencia no impide la instalación
+const FONDOS_OPCIONALES = [
+  'css/fondos/aurora.css',
+  'css/fondos/vaquero.css',
+  'css/fondos/commits.css',
+  'css/fondos/matriz.css',
+];
+
 const ARCHIVOS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'css/style.css',
-  'css/fondos/vaquero.css',
-  'css/fondos/aurora.css',
-  'css/fondos/oscuro.css',
+  'css/fondos/estandar.css',
   'js/app.js',
   'js/alerta.js',
   'js/almacenamiento.js',
+  'js/color.js',
   'js/dialogo.js',
   'js/dias.js',
   'js/dom.js',
@@ -25,6 +32,7 @@ const ARCHIVOS = [
   'js/nucleo.js',
   'js/rueda.js',
   'js/segmentado.js',
+  'js/tema.js',
   'js/tiempo.js',
   'js/turnos.js',
   'js/vista-ajustes.js',
@@ -39,7 +47,11 @@ const ARCHIVOS = [
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
-    caches.open(NOMBRE_CACHE).then((cache) => cache.addAll(ARCHIVOS)).then(() => self.skipWaiting())
+    caches.open(NOMBRE_CACHE)
+      .then((cache) => cache.addAll(ARCHIVOS).then(() => Promise.all(
+        FONDOS_OPCIONALES.map((archivo) => cache.add(archivo).catch(() => { /* ese fondo no está instalado */ })),
+      )))
+      .then(() => self.skipWaiting())
   );
 });
 

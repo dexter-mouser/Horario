@@ -6,12 +6,12 @@
   <!-- Seguridad: solo recursos propios, sin scripts ni estilos externos -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Horario</title>
-  <meta name="theme-color" content="#02060f">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0e1014">
+  <meta name="color-scheme" content="dark light">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Horario">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="img/icono.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="img/icono-apple.png">
@@ -26,9 +26,12 @@
 
       <!-- Pantalla: Hoy -->
       <section id="pantalla-hoy" class="pantalla" aria-labelledby="titulo-hoy">
-        <header>
-          <h1 id="titulo-hoy" class="titulo-pantalla">Hoy</h1>
-          <p id="fecha-hoy" class="fecha"></p>
+        <header class="encabezado-fila">
+          <div>
+            <h1 id="titulo-hoy" class="titulo-pantalla">Hoy</h1>
+            <p id="fecha-hoy" class="fecha"></p>
+          </div>
+          <button id="boton-modo" class="boton-icono" type="button" aria-label="Cambiar de modo"></button>
         </header>
         <div id="fila-dias-hoy" class="fila-dias" role="group" aria-label="Día de la semana"></div>
         <ul id="lista-hoy" class="lista"></ul>
@@ -63,6 +66,18 @@
         <header>
           <h1 id="titulo-ajustes" class="titulo-pantalla">Ajustes</h1>
         </header>
+        <div id="tarjeta-tema" class="tarjeta bloque-ajuste">
+          <h2 id="titulo-modo" class="subtitulo">Modo</h2>
+          <div id="opciones-modo" class="segmentado segmentado-3" role="group" aria-labelledby="titulo-modo">
+            <button class="chip" type="button" data-valor="sistema" aria-pressed="true">Sistema</button>
+            <button class="chip" type="button" data-valor="claro" aria-pressed="false">Claro</button>
+            <button class="chip" type="button" data-valor="oscuro" aria-pressed="false">Oscuro</button>
+          </div>
+          <h2 id="titulo-acento" class="subtitulo">Acento</h2>
+          <div id="opciones-acento" class="muestras" role="group" aria-labelledby="titulo-acento"></div>
+          <p id="acento-actual" class="texto-suave" aria-live="polite"></p>
+          <p id="aviso-tema" class="texto-suave" hidden>Este fondo usa su propia paleta. Elige el fondo Estándar para cambiar el modo y el acento.</p>
+        </div>
         <div class="tarjeta bloque-ajuste">
           <h2 id="titulo-fondo" class="subtitulo">Fondo</h2>
           <div id="opciones-fondo" class="grupo-chips" role="group" aria-labelledby="titulo-fondo"></div>
